@@ -43,8 +43,9 @@ services:
     restart: unless-stopped
     volumes:
       - mysql:/var/lib/mysql
+      - ../backend/db.sql:/docker-entrypoint-initdb.d/1.sql
     ports:
-      - '3306:3306'
+      - 3306
     environment:
       MYSQL_ROOT_PASSWORD: default
       MYSQL_DATABASE: default
