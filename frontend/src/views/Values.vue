@@ -41,11 +41,20 @@
         <v-col><strong>Text</strong></v-col>
         <v-col cols="auto"></v-col>
       </v-row>
-      <v-row v-for="(value, index) in objects" :key="index">
+      <!-- <v-row v-for="(value, index) in objects" :key="index">
         <v-col cols="auto">{{ index + 1 }}</v-col>
         <v-col>{{ value.text }}</v-col>
-        <v-col cols="auto">Delete</v-col>
-      </v-row>
+      </v-row> -->
+      <editable-row
+        pk="id"
+        v-for="(object, index) in objects"
+        v-model="objects[index]"
+        :key="index"
+        :index="index"
+        :fields="fields"
+        :update-url="update_url"
+      >
+      </editable-row>
     </v-container>
   </div>
 </template>
@@ -60,11 +69,13 @@ fieldset {
 <script>
 import axios from "axios";
 import ProgressOverlay from "@/components/ProgressOverlay.vue";
+import EditableRow from "../components/EditableRow.vue";
 
 export default {
   name: "Values",
   components: {
     ProgressOverlay,
+    EditableRow,
   },
   data() {
     return {
@@ -72,6 +83,13 @@ export default {
       new_object: {},
       submitting: false,
       loading: false,
+      update_url: `${process.env.VUE_APP_BACKEND_URL}/api/values/`,
+      fields: [
+        {
+          name: "text",
+          type: "text",
+        },
+      ],
     };
   },
   methods: {
