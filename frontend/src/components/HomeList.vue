@@ -75,9 +75,7 @@ export default {
           }
         );
         this.principles = response.data.data;
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     },
   },
   mounted() {
