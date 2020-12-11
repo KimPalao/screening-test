@@ -1,5 +1,40 @@
 <template>
-  <div></div>
+  <v-container>
+    <v-row>
+      <v-col>
+        <v-row>
+          <h3 class="text-h3">Values</h3>
+        </v-row>
+        <v-row>
+          <v-col>
+            <ol>
+              <li v-for="(value, index) in values" :key="index" class="text-h5">
+                {{ value.text }}
+              </li>
+            </ol>
+          </v-col>
+        </v-row>
+      </v-col>
+      <v-col>
+        <v-row>
+          <h3 class="text-h3">Principles</h3>
+        </v-row>
+        <v-row>
+          <v-col>
+            <ol>
+              <li
+                v-for="(principle, index) in principles"
+                :key="index"
+                class="text-h5"
+              >
+                {{ principle.text }}
+              </li>
+            </ol>
+          </v-col>
+        </v-row>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
