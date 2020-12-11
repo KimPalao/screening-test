@@ -1,3 +1,4 @@
+from typing import Dict
 from django.db.models.base import Model
 from rest_framework import permissions
 from rest_framework.views import APIView
@@ -14,6 +15,8 @@ class CRUDView(APIView):
 
     permission_classes = (permissions.AllowAny,)
 
+    get_query_params: Dict
+
     def _get_single(self, request, id):
         object = self.view_model.objects.filter(pk=id).first()
         if not object:
@@ -29,10 +32,13 @@ class CRUDView(APIView):
 
         objects = self.view_model.objects
 
-        if "text_contains" in request.query_params:
-            objects = objects.filter(
-                text__icontains=request.query_params.get("text_contains")
-            )
+        query_filter = {}
+
+        for param, query in self.get_query_params.items():
+            if param in request.query_params:
+                query_filter[query] = request.query_params.get(param)
+
+        objects = objects.filter(**query_filter)
 
         filtered_count = objects.count()
 
@@ -102,3 +108,7 @@ class CRUDView(APIView):
 
 class Values(CRUDView):
     view_model = Value
+
+    get_query_params = {
+        "text_contains": "text__icontains",
+    }
