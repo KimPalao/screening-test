@@ -61,3 +61,54 @@ class ValueTestCase(TestCase):
         value_id = 10
         response = self.client.get(f"/api/values/{value_id}")
         self.assertEqual(response.status_code, 404)
+
+    def test_value_update(self):
+        value_id = 4
+        text = "sample text"
+        response = self.client.patch(
+            f"/api/values/{value_id}", {"text": text}, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"/api/values/{value_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["data"]["text"], text)
+
+    def test_value_update_no_change(self):
+        value_id = 4
+        text = values[value_id - 1]
+        response = self.client.patch(
+            f"/api/values/{value_id}", {"text": text}, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"/api/values/{value_id}")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["data"]["text"], text)
+
+    def test_value_update_failed(self):
+        value_id = 3
+        text = values[0]
+        response = self.client.patch(
+            f"/api/values/{value_id}", {"text": text}, format="json"
+        )
+        self.assertEqual(response.status_code, 409)
+
+    def test_value_update_not_found(self):
+        value_id = 5
+        text = "sample text"
+        response = self.client.patch(
+            f"/api/values/{value_id}", {"text": text}, format="json"
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_value_update_blank_text(self):
+        value_id = 4
+        text = ""
+        response = self.client.patch(
+            f"/api/values/{value_id}", {"text": text}, format="json"
+        )
+        self.assertEqual(response.status_code, 422)
+
+    def test_value_update_no_text(self):
+        value_id = 4
+        response = self.client.patch(f"/api/values/{value_id}", {}, format="json")
+        self.assertEqual(response.status_code, 200)

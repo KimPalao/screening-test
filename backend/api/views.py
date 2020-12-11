@@ -14,7 +14,7 @@ class Values(APIView):
     def _get_single(self, request, id):
         object = Value.objects.filter(pk=id).first()
         if not object:
-            return Response({}, 404)
+            return Response({"message": "Value not found"}, 404)
         return Response({"data": {"id": object.id, "text": object.text}})
 
     def _get_list(self, request):
@@ -60,3 +60,21 @@ class Values(APIView):
             return Response({"message": "This value already exists"}, 409)
         value = Value.objects.create(text=text)
         return Response({"id": value.id}, 201)
+
+    def patch(self, request: Request, id: int):
+        q = Value.objects.filter(pk=id)
+        if not q.exists():
+            return Response({"message": "Value not found"}, 404)
+
+        text = request.data.get("text", None)
+
+        data = {}
+
+        if text is not None:
+            if Value.objects.filter(text=text).exclude(pk=id).exists():
+                return Response({"message": "This value already exists"}, 409)
+            if not len(text.strip()):
+                return Response({"message": "Text must not be empty"}, 422)
+            data["text"] = text
+        q.update(**data)
+        return Response({}, 200)
