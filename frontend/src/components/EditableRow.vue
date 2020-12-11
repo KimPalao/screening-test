@@ -4,6 +4,7 @@
     <v-col v-for="(field, index) in fields" :key="index">
       <div
         class="editable"
+        :data-field="field.name"
         v-if="focused != field.name"
         @click="focused = field.name"
       >
