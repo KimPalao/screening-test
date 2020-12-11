@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
-from .models import Value
+from .models import Principle, Value
 
 # Create your views here.
 
@@ -108,6 +108,14 @@ class CRUDView(APIView):
 
 class Values(CRUDView):
     view_model = Value
+
+    get_query_params = {
+        "text_contains": "text__icontains",
+    }
+
+
+class Principles(CRUDView):
+    view_model = Principle
 
     get_query_params = {
         "text_contains": "text__icontains",
