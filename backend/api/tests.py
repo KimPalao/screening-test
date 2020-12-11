@@ -112,3 +112,15 @@ class ValueTestCase(TestCase):
         value_id = 4
         response = self.client.patch(f"/api/values/{value_id}", {}, format="json")
         self.assertEqual(response.status_code, 200)
+
+    def test_value_delete(self):
+        value_id = 4
+        response = self.client.delete(f"/api/values/{value_id}")
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(f"/api/values/{value_id}")
+        self.assertEqual(response.status_code, 404)
+
+    def test_value_delete_not_found(self):
+        value_id = 5
+        response = self.client.delete(f"/api/values/{value_id}")
+        self.assertEqual(response.status_code, 404)

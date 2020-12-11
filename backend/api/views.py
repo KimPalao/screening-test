@@ -78,3 +78,10 @@ class Values(APIView):
             data["text"] = text
         q.update(**data)
         return Response({}, 200)
+
+    def delete(self, request: Request, id: int):
+        object = Value.objects.filter(pk=id).first()
+        if not object:
+            return Response({"message": "Value not found"}, 404)
+        object.delete()
+        return Response()
