@@ -17,3 +17,8 @@ class ValueTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["id"], 5)
+
+    def test_value_get(self):
+        response = self.client.get("/api/values")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.json()["data"]), 4)
