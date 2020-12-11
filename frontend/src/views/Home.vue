@@ -1,14 +1,14 @@
 <template>
-  <div class="home"></div>
+  <div class="home">
+    <home-list />
+  </div>
 </template>
 
 <script>
-// @ is an alias to /src
+import HomeList from "../components/HomeList.vue";
 
 export default {
   name: "Home",
-  components: {
-    HelloWorld,
-  },
+  components: { HomeList },
 };
 </script>
