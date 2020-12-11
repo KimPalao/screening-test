@@ -40,7 +40,7 @@ class CRUDView(APIView):
             if param in request.query_params:
                 query_filter[query] = request.query_params.get(param)
 
-        objects = objects.filter(**query_filter)
+        objects = objects.filter(**query_filter).order_by("pk")
 
         filtered_count = objects.count()
 
