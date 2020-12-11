@@ -32,7 +32,9 @@ services:
       MYSQL_USER: default
       MYSQL_PASSWORD: default
 
-      BACKEND_URL: localhost:8000
+      VUE_APP_BACKEND_URL: http://localhost:8001
+
+      CORS_ALLOWED_ORIGINS: "http://localhost:8080"
 
     # Uncomment the next line to use a non-root user for all processes.
     # user: vscode
@@ -48,6 +50,8 @@ services:
       - ../backend/db.sql:/docker-entrypoint-initdb.d/1.sql
     ports:
       - 3306
+      - 8001:8001
+      - 8080:8080
     environment:
       MYSQL_ROOT_PASSWORD: default
       MYSQL_DATABASE: default
