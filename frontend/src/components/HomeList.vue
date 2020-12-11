@@ -60,9 +60,7 @@ export default {
           }
         );
         this.values = response.data.data;
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
     },
     async get_principles() {
       try {

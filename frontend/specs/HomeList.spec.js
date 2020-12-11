@@ -19,7 +19,7 @@ axios.get.mockImplementation((url) => {
 })
 
 describe('HomeList', () => {
-  it('Renders two lists', async () => {
+  it('renders two lists and 16 list items', async () => {
     const wrapper = mount(HomeList);
     expect(wrapper.findAll('ol')).toHaveLength(2);
     await flushPromises();
