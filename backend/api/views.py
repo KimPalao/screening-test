@@ -1,3 +1,4 @@
+from django.db.models.base import Model
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.request import Request
@@ -8,13 +9,15 @@ from .models import Value
 # Create your views here.
 
 
-class Values(APIView):
+class CRUDView(APIView):
+    view_model: Model
+
     permission_classes = (permissions.AllowAny,)
 
     def _get_single(self, request, id):
-        object = Value.objects.filter(pk=id).first()
+        object = self.view_model.objects.filter(pk=id).first()
         if not object:
-            return Response({"message": "Value not found"}, 404)
+            return Response({"message": f"{self.view_model.__name__} not found"}, 404)
         return Response({"data": {"id": object.id, "text": object.text}})
 
     def _get_list(self, request):
@@ -24,7 +27,7 @@ class Values(APIView):
         start = (page - 1) * per_page
         end = start + per_page
 
-        objects = Value.objects
+        objects = self.view_model.objects
 
         if "text_contains" in request.query_params:
             objects = objects.filter(
@@ -41,7 +44,7 @@ class Values(APIView):
             {
                 "data": data,
                 "filtered_count": filtered_count,
-                "total_count": Value.objects.count(),
+                "total_count": self.view_model.objects.count(),
             }
         )
 
@@ -56,23 +59,33 @@ class Values(APIView):
         text = request.data.get("text")
         if not len(text.strip()):
             return Response({"message": "Text must not be empty"}, 422)
-        if Value.objects.filter(text=text).exists():
-            return Response({"message": "This value already exists"}, 409)
-        value = Value.objects.create(text=text)
-        return Response({"id": value.id}, 201)
+        if self.view_model.objects.filter(text=text).exists():
+            return Response(
+                {
+                    "message": f"A {self.view_model.__name__} with this text already exists"
+                },
+                409,
+            )
+        object = self.view_model.objects.create(text=text)
+        return Response({"id": object.id}, 201)
 
     def patch(self, request: Request, id: int):
-        q = Value.objects.filter(pk=id)
+        q = self.view_model.objects.filter(pk=id)
         if not q.exists():
-            return Response({"message": "Value not found"}, 404)
+            return Response({"message": f"{self.view_model.__name__} not found"}, 404)
 
         text = request.data.get("text", None)
 
         data = {}
 
         if text is not None:
-            if Value.objects.filter(text=text).exclude(pk=id).exists():
-                return Response({"message": "This value already exists"}, 409)
+            if self.view_model.objects.filter(text=text).exclude(pk=id).exists():
+                return Response(
+                    {
+                        "message": f"A {self.view_model.__name__} with this text already exists"
+                    },
+                    409,
+                )
             if not len(text.strip()):
                 return Response({"message": "Text must not be empty"}, 422)
             data["text"] = text
@@ -80,8 +93,12 @@ class Values(APIView):
         return Response({}, 200)
 
     def delete(self, request: Request, id: int):
-        object = Value.objects.filter(pk=id).first()
+        object = self.view_model.objects.filter(pk=id).first()
         if not object:
-            return Response({"message": "Value not found"}, 404)
+            return Response({"message": f"{self.view_model.__name__} not found"}, 404)
         object.delete()
         return Response()
+
+
+class Values(CRUDView):
+    view_model = Value

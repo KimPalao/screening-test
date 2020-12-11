@@ -28,14 +28,19 @@ class ValueTestCase(TestCase):
     def test_value_insert_blank_text(self):
         response = self.client.put("/api/values", {"text": ""}, format="json")
         self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()["message"], "Text must not be empty")
 
     def test_value_insert_missing_params(self):
         response = self.client.put("/api/values", {}, format="json")
         self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["message"], "Text is required")
 
     def test_value_insert_duplicate(self):
         response = self.client.put("/api/values", {"text": values[0]}, format="json")
         self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            response.json()["message"], "A Value with this text already exists"
+        )
 
     def test_value_get(self):
         response = self.client.get("/api/values")
@@ -61,6 +66,7 @@ class ValueTestCase(TestCase):
         value_id = 10
         response = self.client.get(f"/api/values/{value_id}")
         self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["message"], "Value not found")
 
     def test_value_update(self):
         value_id = 4
@@ -91,6 +97,9 @@ class ValueTestCase(TestCase):
             f"/api/values/{value_id}", {"text": text}, format="json"
         )
         self.assertEqual(response.status_code, 409)
+        self.assertEqual(
+            response.json()["message"], "A Value with this text already exists"
+        )
 
     def test_value_update_not_found(self):
         value_id = 5
@@ -99,6 +108,7 @@ class ValueTestCase(TestCase):
             f"/api/values/{value_id}", {"text": text}, format="json"
         )
         self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["message"], "Value not found")
 
     def test_value_update_blank_text(self):
         value_id = 4
@@ -107,6 +117,7 @@ class ValueTestCase(TestCase):
             f"/api/values/{value_id}", {"text": text}, format="json"
         )
         self.assertEqual(response.status_code, 422)
+        self.assertEqual(response.json()["message"], "Text must not be empty")
 
     def test_value_update_no_text(self):
         value_id = 4
@@ -119,8 +130,10 @@ class ValueTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         response = self.client.get(f"/api/values/{value_id}")
         self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["message"], "Value not found")
 
     def test_value_delete_not_found(self):
         value_id = 5
         response = self.client.delete(f"/api/values/{value_id}")
         self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["message"], "Value not found")
