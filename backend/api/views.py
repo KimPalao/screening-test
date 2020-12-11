@@ -16,6 +16,8 @@ class CRUDView(APIView):
     permission_classes = (permissions.AllowAny,)
 
     get_query_params: Dict
+    put_data: Dict
+    patch_data: Dict
 
     def _get_single(self, request, id):
         object = self.view_model.objects.filter(pk=id).first()
@@ -60,19 +62,29 @@ class CRUDView(APIView):
         return self._get_list(request)
 
     def put(self, request: Request):
-        if "text" not in request.data:
-            return Response({"message": "Text is required"}, 400)
-        text = request.data.get("text")
-        if not len(text.strip()):
-            return Response({"message": "Text must not be empty"}, 422)
-        if self.view_model.objects.filter(text=text).exists():
-            return Response(
-                {
-                    "message": f"A {self.view_model.__name__} with this text already exists"
-                },
-                409,
-            )
-        object = self.view_model.objects.create(text=text)
+        data = {}
+        for field, meta in self.put_data.items():
+            if meta.get("required", False) and field not in request.data:
+                return Response({"message": f"{field.capitalize()} is required"}, 400)
+            value = request.data.get(field)
+
+            if not meta.get("blank", True) and not len(value.strip()):
+                return Response(
+                    {"message": f"{field.capitalize()} must not be empty"}, 422
+                )
+            if (
+                meta.get("unique", False)
+                and self.view_model.objects.filter(**{field: value}).exists()
+            ):
+                return Response(
+                    {
+                        "message": f"A {self.view_model.__name__} with this {field} already exists"
+                    },
+                    409,
+                )
+            data[field] = value
+
+        object = self.view_model.objects.create(**data)
         return Response({"id": object.id}, 201)
 
     def patch(self, request: Request, id: int):
@@ -80,21 +92,28 @@ class CRUDView(APIView):
         if not q.exists():
             return Response({"message": f"{self.view_model.__name__} not found"}, 404)
 
-        text = request.data.get("text", None)
-
         data = {}
 
-        if text is not None:
-            if self.view_model.objects.filter(text=text).exclude(pk=id).exists():
-                return Response(
-                    {
-                        "message": f"A {self.view_model.__name__} with this text already exists"
-                    },
-                    409,
-                )
-            if not len(text.strip()):
-                return Response({"message": "Text must not be empty"}, 422)
-            data["text"] = text
+        for field, meta in self.patch_data.items():
+            value = request.data.get(field, None)
+            if value is not None:
+                if (
+                    meta.get("unique", False)
+                    and self.view_model.objects.filter(**{field: value})
+                    .exclude(pk=id)
+                    .exists()
+                ):
+                    return Response(
+                        {
+                            "message": f"A {self.view_model.__name__} with this {field} already exists"
+                        },
+                        409,
+                    )
+                if not meta.get("blank", True) and not len(value.strip()):
+                    return Response(
+                        {"message": f"{field.capitalize()} must not be empty"}, 422
+                    )
+                data[field] = value
         q.update(**data)
         return Response({}, 200)
 
@@ -113,6 +132,10 @@ class Values(CRUDView):
         "text_contains": "text__icontains",
     }
 
+    put_data = {"text": {"required": True, "blank": False, "unique": True}}
+
+    patch_data = {"text": {"blank": False, "unique": True}}
+
 
 class Principles(CRUDView):
     view_model = Principle
@@ -120,3 +143,7 @@ class Principles(CRUDView):
     get_query_params = {
         "text_contains": "text__icontains",
     }
+
+    put_data = {"text": {"required": True, "blank": False, "unique": True}}
+
+    patch_data = {"text": {"blank": False, "unique": True}}
