@@ -21,7 +21,7 @@ class CRUDView(APIView):
         object = self.view_model.objects.filter(pk=id).first()
         if not object:
             return Response({"message": f"{self.view_model.__name__} not found"}, 404)
-        return Response({"data": {"id": object.id, "text": object.text}})
+        return Response({"data": object.to_json()})
 
     def _get_list(self, request):
         page = int(request.query_params.get("page", 1))
@@ -44,7 +44,7 @@ class CRUDView(APIView):
 
         objects = objects if "all" in request.query_params else objects.all()[start:end]
 
-        data = [{"id": object.id, "text": object.text} for object in objects]
+        data = [object.to_json() for object in objects]
 
         return Response(
             {
