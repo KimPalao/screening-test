@@ -11,7 +11,13 @@ from .models import Value
 class Values(APIView):
     permission_classes = (permissions.AllowAny,)
 
-    def get(self, request: Request):
+    def _get_single(self, request, id):
+        object = Value.objects.filter(pk=id).first()
+        if not object:
+            return Response({}, 404)
+        return Response({"data": {"id": object.id, "text": object.text}})
+
+    def _get_list(self, request):
         page = int(request.query_params.get("page", 1))
         per_page = int(request.query_params.get("per_page", 10))
 
@@ -19,6 +25,11 @@ class Values(APIView):
         end = start + per_page
 
         objects = Value.objects
+
+        if "text_contains" in request.query_params:
+            objects = objects.filter(
+                text__icontains=request.query_params.get("text_contains")
+            )
 
         filtered_count = objects.count()
 
@@ -33,6 +44,11 @@ class Values(APIView):
                 "total_count": Value.objects.count(),
             }
         )
+
+    def get(self, request: Request, id=0):
+        if id:
+            return self._get_single(request, id)
+        return self._get_list(request)
 
     def put(self, request: Request):
         text = request.data.get("text")
