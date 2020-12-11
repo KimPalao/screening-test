@@ -32,6 +32,8 @@ services:
       MYSQL_USER: default
       MYSQL_PASSWORD: default
 
+      BACKEND_URL: localhost:8000
+
     # Uncomment the next line to use a non-root user for all processes.
     # user: vscode
 
