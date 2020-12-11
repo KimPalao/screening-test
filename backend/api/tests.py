@@ -25,6 +25,18 @@ class ValueTestCase(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json()["id"], 5)
 
+    def test_value_insert_blank_text(self):
+        response = self.client.put("/api/values", {"text": ""}, format="json")
+        self.assertEqual(response.status_code, 422)
+
+    def test_value_insert_missing_params(self):
+        response = self.client.put("/api/values", {}, format="json")
+        self.assertEqual(response.status_code, 400)
+
+    def test_value_insert_duplicate(self):
+        response = self.client.put("/api/values", {"text": values[0]}, format="json")
+        self.assertEqual(response.status_code, 409)
+
     def test_value_get(self):
         response = self.client.get("/api/values")
         self.assertEqual(response.status_code, 200)

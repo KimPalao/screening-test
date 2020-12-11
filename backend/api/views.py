@@ -51,6 +51,8 @@ class Values(APIView):
         return self._get_list(request)
 
     def put(self, request: Request):
+        if "text" not in request.data:
+            return Response({"message": "Text is required"}, 400)
         text = request.data.get("text")
         if not len(text.strip()):
             return Response({"message": "Text must not be empty"}, 422)
