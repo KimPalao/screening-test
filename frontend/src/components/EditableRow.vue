@@ -107,6 +107,7 @@ export default {
       try {
         await axios.patch(`${this.updateUrl}${this.value.id}`, data);
         this.$emit("input", { ...this.value, [key]: value });
+        console.log("updated");
       } catch (e) {
         console.log(e);
       } finally {
