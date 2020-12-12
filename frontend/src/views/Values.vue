@@ -47,6 +47,7 @@
       </v-row> -->
       <editable-row
         pk="id"
+        label="text"
         v-for="(object, index) in objects"
         v-model="objects[index]"
         :key="index"

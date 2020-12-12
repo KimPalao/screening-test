@@ -21,16 +21,51 @@
         ></v-text-field>
       </div>
     </v-col>
-    <v-col cols="auto"
-      ><v-btn icon color="red"><v-icon>mdi-delete</v-icon></v-btn></v-col
-    >
+    <v-col cols="auto">
+      <v-dialog v-model="dialog" width="500">
+        <template v-slot:activator="{ on, attrs }">
+          <v-btn icon color="red" v-bind="attrs" v-on="on"
+            ><v-icon>mdi-delete</v-icon></v-btn
+          >
+        </template>
+
+        <v-card>
+          <v-card-title class="headline grey lighten-2">
+            Confirm Deletion
+          </v-card-title>
+
+          <v-card-text class="pa-4">
+            Are you sure you want to delete {{ value[label] }}?</v-card-text
+          >
+
+          <v-divider></v-divider>
+
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn
+              color="primary"
+              text
+              @click="remove(value[pk])"
+              class="confirm-delete"
+            >
+              Confirm
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-col>
+    <progress-overlay :value="submitting" />
   </v-row>
 </template>
 
 <script>
 import axios from "axios";
+import ProgressOverlay from "@/components/ProgressOverlay.vue";
 export default {
   name: "EditableRow",
+  components: {
+    ProgressOverlay,
+  },
   props: {
     value: {
       type: Object,
@@ -41,6 +76,10 @@ export default {
       required: true,
     },
     pk: {
+      type: String,
+      required: true,
+    },
+    label: {
       type: String,
       required: true,
     },
@@ -55,7 +94,9 @@ export default {
   },
   data() {
     return {
+      dialog: false,
       focused: "",
+      submitting: false,
     };
   },
   methods: {
@@ -68,6 +109,16 @@ export default {
         this.$emit("input", { ...this.value, [key]: value });
       } catch (e) {
         console.log(e);
+      } finally {
+        this.submitting = false;
+      }
+    },
+    async remove(key) {
+      this.submitting = true;
+      try {
+        await axios.delete(`${this.updateUrl}${this.value.id}`);
+        this.$emit("delete");
+      } catch (e) {
       } finally {
         this.submitting = false;
       }
@@ -87,5 +138,8 @@ export default {
 <style scoped>
 .editable {
   cursor: pointer;
+}
+.row {
+  position: relative;
 }
 </style>
