@@ -22,6 +22,6 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-coverage
+dist
 
 __pycache__
