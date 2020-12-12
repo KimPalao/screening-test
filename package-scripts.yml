@@ -2,6 +2,9 @@ scripts:
   frontend-dev: cd frontend && yarn serve
   frontend-test: cd frontend && yarn jest
   frontend: cd frontend && yarn build && serve -s dist -p 8080
-  backend-dev: cd backend && pip install -r requirements.txt && python manage.py runserver `printenv BACKEND_HOST`:`printenv BACKEND_PORT`
+  backend-dev: cd backend && pip install -r requirements.txt && python manage.py runserver ${BACKEND_HOST}:${BACKEND_PORT}
   backend-test: cd backend && python manage.py test
-  backend: cd backend && gunicorn -b `printenv BACKEND_HOST`:`printenv BACKEND_PORT` backend.wsgi
+  backend: cd backend && gunicorn -b ${BACKEND_HOST}:${BACKEND_PORT} backend.wsgi
+  run: docker-compose up
+  build: docker-compose build
+  build-run: docker-compose up --build

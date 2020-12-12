@@ -23,5 +23,6 @@ pnpm-debug.log*
 *.sw?
 
 dist
+.env
 
 __pycache__
