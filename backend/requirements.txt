@@ -3,3 +3,4 @@ mysqlclient
 django-mysql
 djangorestframework
 django-cors-headers
+gunicorn
