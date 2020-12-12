@@ -28,18 +28,18 @@ class ValueTestCase(TestCase):
     def test_value_insert_blank_text(self):
         response = self.client.put("/api/values", {"text": ""}, format="json")
         self.assertEqual(response.status_code, 422)
-        self.assertEqual(response.json()["message"], "Text must not be empty")
+        self.assertEqual(response.json()["message"]["text"], "Text must not be empty")
 
     def test_value_insert_missing_params(self):
         response = self.client.put("/api/values", {}, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["message"], "Text is required")
+        self.assertEqual(response.json()["message"]["text"], "Text is required")
 
     def test_value_insert_duplicate(self):
         response = self.client.put("/api/values", {"text": values[0]}, format="json")
         self.assertEqual(response.status_code, 409)
         self.assertEqual(
-            response.json()["message"], "A Value with this text already exists"
+            response.json()["message"]["text"], "A Value with this text already exists"
         )
 
     def test_value_get(self):
@@ -98,7 +98,7 @@ class ValueTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 409)
         self.assertEqual(
-            response.json()["message"], "A Value with this text already exists"
+            response.json()["message"]["text"], "A Value with this text already exists"
         )
 
     def test_value_update_not_found(self):
@@ -117,7 +117,7 @@ class ValueTestCase(TestCase):
             f"/api/values/{value_id}", {"text": text}, format="json"
         )
         self.assertEqual(response.status_code, 422)
-        self.assertEqual(response.json()["message"], "Text must not be empty")
+        self.assertEqual(response.json()["message"]["text"], "Text must not be empty")
 
     def test_value_update_no_text(self):
         value_id = 4
@@ -169,12 +169,12 @@ class PrincipleTestCase(TestCase):
     def test_principle_insert_blank_text(self):
         response = self.client.put("/api/principles", {"text": ""}, format="json")
         self.assertEqual(response.status_code, 422)
-        self.assertEqual(response.json()["message"], "Text must not be empty")
+        self.assertEqual(response.json()["message"]["text"], "Text must not be empty")
 
     def test_principle_insert_missing_params(self):
         response = self.client.put("/api/principles", {}, format="json")
         self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json()["message"], "Text is required")
+        self.assertEqual(response.json()["message"]["text"], "Text is required")
 
     def test_principle_insert_duplicate(self):
         response = self.client.put(
@@ -182,7 +182,8 @@ class PrincipleTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 409)
         self.assertEqual(
-            response.json()["message"], "A Principle with this text already exists"
+            response.json()["message"]["text"],
+            "A Principle with this text already exists",
         )
 
     def test_principle_get(self):
@@ -246,7 +247,8 @@ class PrincipleTestCase(TestCase):
         )
         self.assertEqual(response.status_code, 409)
         self.assertEqual(
-            response.json()["message"], "A Principle with this text already exists"
+            response.json()["message"]["text"],
+            "A Principle with this text already exists",
         )
 
     def test_principle_update_not_found(self):
@@ -265,7 +267,7 @@ class PrincipleTestCase(TestCase):
             f"/api/principles/{principle_id}", {"text": text}, format="json"
         )
         self.assertEqual(response.status_code, 422)
-        self.assertEqual(response.json()["message"], "Text must not be empty")
+        self.assertEqual(response.json()["message"]["text"], "Text must not be empty")
 
     def test_principle_update_no_text(self):
         principle_id = 4

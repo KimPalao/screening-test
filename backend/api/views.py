@@ -63,12 +63,20 @@ class CRUDView(APIView):
 
     def put(self, request: Request):
         data = {}
+        errors = {}
+        error_status = 500
         for field, meta in self.put_data.items():
             if meta.get("required", False) and field not in request.data:
+                errors[field] = f"{field.capitalize()} is required"
+                error_status = min(error_status, 400)
+                continue
                 return Response({"message": f"{field.capitalize()} is required"}, 400)
             value = request.data.get(field)
 
             if not meta.get("blank", True) and not len(value.strip()):
+                errors[field] = f"{field.capitalize()} must not be empty"
+                error_status = min(error_status, 422)
+                continue
                 return Response(
                     {"message": f"{field.capitalize()} must not be empty"}, 422
                 )
@@ -76,6 +84,11 @@ class CRUDView(APIView):
                 meta.get("unique", False)
                 and self.view_model.objects.filter(**{field: value}).exists()
             ):
+                errors[
+                    field
+                ] = f"A {self.view_model.__name__} with this {field} already exists"
+                error_status = min(error_status, 409)
+                continue
                 return Response(
                     {
                         "message": f"A {self.view_model.__name__} with this {field} already exists"
@@ -83,7 +96,8 @@ class CRUDView(APIView):
                     409,
                 )
             data[field] = value
-
+        if len(errors):
+            return Response({"message": errors}, error_status)
         object = self.view_model.objects.create(**data)
         return Response({"id": object.id}, 201)
 
@@ -93,6 +107,8 @@ class CRUDView(APIView):
             return Response({"message": f"{self.view_model.__name__} not found"}, 404)
 
         data = {}
+        errors = {}
+        error_status = 500
 
         for field, meta in self.patch_data.items():
             value = request.data.get(field, None)
@@ -103,6 +119,11 @@ class CRUDView(APIView):
                     .exclude(pk=id)
                     .exists()
                 ):
+                    errors[
+                        field
+                    ] = f"A {self.view_model.__name__} with this {field} already exists"
+                    error_status = min(error_status, 409)
+                    continue
                     return Response(
                         {
                             "message": f"A {self.view_model.__name__} with this {field} already exists"
@@ -110,10 +131,15 @@ class CRUDView(APIView):
                         409,
                     )
                 if not meta.get("blank", True) and not len(value.strip()):
+                    errors[field] = f"{field.capitalize()} must not be empty"
+                    error_status = min(error_status, 422)
+                    continue
                     return Response(
                         {"message": f"{field.capitalize()} must not be empty"}, 422
                     )
                 data[field] = value
+        if len(errors):
+            return Response({"message": errors}, status=error_status)
         q.update(**data)
         return Response({}, 200)
 
