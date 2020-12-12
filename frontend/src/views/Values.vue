@@ -19,6 +19,7 @@
                       v-model="new_object.text"
                       label="Text"
                       required
+                      :error-messages="errors.text"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -91,6 +92,7 @@ export default {
           type: "text",
         },
       ],
+      errors: {},
     };
   },
   methods: {
@@ -120,7 +122,9 @@ export default {
           this.get_data();
         }
       } catch (e) {
-        console.log(e);
+        if (e.response) {
+          this.errors = e.response.data.message;
+        }
       } finally {
         this.submitting = false;
       }
