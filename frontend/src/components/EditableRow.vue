@@ -16,6 +16,7 @@
           :type="field.type"
           @change="update(field.name, $event)"
           @blur="focused = ''"
+          @input="errors[field.name] = ''"
           :ref="field.name"
           :error-messages="errors[field.name]"
         ></v-text-field>
@@ -125,6 +126,7 @@ export default {
       } catch (e) {
       } finally {
         this.submitting = false;
+        this.dialog = false;
       }
     },
   },

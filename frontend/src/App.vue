@@ -14,17 +14,21 @@
 
       <v-spacer></v-spacer>
 
-      <v-btn text>
-        <router-link to="/" class="white--text"> Home </router-link>
-      </v-btn>
-      <v-btn text>
-        <router-link to="/values" class="white--text"> Values </router-link>
-      </v-btn>
-      <v-btn text>
-        <router-link to="/principles" class="white--text">
+      <router-link to="/" class="white--text"> 
+        <v-btn text>
+          Home 
+        </v-btn>
+      </router-link>
+      <router-link to="/values" class="white--text"> 
+        <v-btn text>
+          Values 
+        </v-btn>
+      </router-link>
+      <router-link to="/principles" class="white--text">
+        <v-btn text>
           Principles
-        </router-link>
-      </v-btn>
+        </v-btn>
+      </router-link>
     </v-app-bar>
 
     <v-main>

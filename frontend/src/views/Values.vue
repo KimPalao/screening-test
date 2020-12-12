@@ -20,6 +20,7 @@
                       label="Text"
                       required
                       :error-messages="errors.text"
+                      @input="errors.text = ''"
                     ></v-text-field>
                   </v-col>
                   <v-col
@@ -55,6 +56,7 @@
         :index="index"
         :fields="fields"
         :update-url="update_url"
+        @delete="get_data"
       >
       </editable-row>
     </v-container>
