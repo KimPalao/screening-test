@@ -2,8 +2,17 @@ import { mount, shallowMount } from '@vue/test-utils';
 import EditableRow from '@/components/EditableRow';
 import Vue from 'vue';
 import flushPromises from 'flush-promises';
+import axios from 'axios';
 
 jest.mock('axios');
+
+axios.patch.mockImplementation((url) => {
+  if (url.includes(`${process.env.VUE_APP_BACKEND_URL}/api/fail`)) {
+    return Promise.reject(new Error('fail'));
+  } else {
+    return Promise.resolve({});
+  }
+});
 
 describe('EditableRow', () => {
   it('has one column for each field plus 2', async () => {
@@ -68,18 +77,6 @@ describe('EditableRow', () => {
     expect(wrapper.findComponent({ref: 'text'}).exists()).toBe(false);
   });
 
-  it('hides the text field on pressing enter', async() => {
-    const wrapper = mount(EditableRow, {
-      propsData: propsData,
-    });
-    const editable_text = wrapper.find('[data-field="text"]');
-    await editable_text.trigger('click');
-    expect(wrapper.vm.$data.focused).toBe('text');
-    const input = wrapper.getComponent({ ref: 'text'}).find('input');
-    await input.trigger('keyup.enter');
-    expect(wrapper.findComponent({ref: 'text'}).exists()).toBe(false);
-  });
-  
   it('displays a progress spinner when submitting, and hides when not', async () => {
     const wrapper = mount(EditableRow, {
       propsData: propsData,
@@ -127,6 +124,55 @@ describe('EditableRow', () => {
 
     editable_text = editable_row.find('[data-field="text"]');
     expect(editable_text.text()).toContain(text);
+  });
+  it('still has v-text-field visible after failed update', async () => {
+    const div = document.createElement('div')
+    div.id = 'root';
+    document.body.appendChild(div);
+    const wrapper = mount({
+      data() {
+          return {
+          value: {
+            id: 1,
+            text: 'text',
+          },
+          index: 0,
+          pk: 'id',
+          label: 'text',
+          fields: [
+            {name: 'text', type: 'text'},
+          ],
+          updateUrl: `${process.env.VUE_APP_BACKEND_URL}/api/fail/`
+        };
+      },
+      template: `<div> <editable-row pk="id"
+      label="text"
+      v-model="value"
+      :key="index"
+      :index="index"
+      :fields="fields"
+      :update-url="updateUrl"
+    >
+    </editable-row> </div>`,
+      components: { EditableRow },
+      attachTo: '#root'
+    });
+
+    const text = 'sample text';
+
+    const editable_row = wrapper.getComponent(EditableRow);
+
+    let editable_text = editable_row.find('[data-field="text"]');
+    await editable_text.trigger('click');
+    const input = editable_row.getComponent({ ref: 'text' }).find('input');
+    input.setValue(text);
+    editable_row.vm.update('text', text);
+
+    await flushPromises();
+    await Vue.nextTick();
+
+    editable_row.getComponent({ ref: 'text' });
+
   });
 
 })

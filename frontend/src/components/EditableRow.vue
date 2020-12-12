@@ -15,9 +15,9 @@
           :value="value[field.name]"
           :type="field.type"
           @change="update(field.name, $event)"
-          @keyup.enter="focused = ''"
           @blur="focused = ''"
           :ref="field.name"
+          :error-messages="errors[field.name]"
         ></v-text-field>
       </div>
     </v-col>
@@ -97,6 +97,7 @@ export default {
       dialog: false,
       focused: "",
       submitting: false,
+      errors: {},
     };
   },
   methods: {
@@ -107,9 +108,11 @@ export default {
       try {
         await axios.patch(`${this.updateUrl}${this.value.id}`, data);
         this.$emit("input", { ...this.value, [key]: value });
-        console.log("updated");
+        this.focused = "";
       } catch (e) {
-        console.log(e);
+        if (e.response) {
+          this.errors = e.response.data.message;
+        }
       } finally {
         this.submitting = false;
       }
